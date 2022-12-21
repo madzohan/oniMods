@@ -1,0 +1,6 @@
+.idea
+.gitignore
+Debug
+lib
+obj
+*.sln.DotSettings.user
