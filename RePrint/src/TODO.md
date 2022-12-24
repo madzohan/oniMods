@@ -1,3 +1,2 @@
-- [ ] get rid of ugly blinking on reject
 - [ ] gui switch to keep blueprints or reject on ESC
 - [ ] ensure printed last selected care package https://steamcommunity.com/sharedfiles/filedetails/?id=1879935708

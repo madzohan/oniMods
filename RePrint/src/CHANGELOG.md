@@ -16,3 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Suppress the confirmation popup on "reject all"
+
+## [1.2.0] - 2022-12-26
+
+### Added
+
+- Added standard "Reroll" button above each duplicant
