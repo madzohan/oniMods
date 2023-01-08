@@ -17,33 +17,33 @@ namespace RePrint
                 Traverse.Create(__instance).Field("rejectButton").Field("onClick").SetValue(actions);
             }
         }
-        
+
         [HarmonyPatch(typeof(ImmigrantScreen), "OnRejectionConfirmed")]
         public class ImmigrantScreenOnRejectionConfirmedPatch
         {
             // Following "rejection confirm" actions with a new ImmigrantScreen generated
             public static void Postfix(ImmigrantScreen __instance)
             {
+                Immigration.Instance.timeBeforeSpawn = 0.0f;
                 ImmigrantScreen.InitializeImmigrantScreen(__instance.Telepad);
             }
         }
-        
+
         [HarmonyPatch(typeof(ImmigrantScreen), "Initialize")]
         public class ImmigrantScreenInitializePatch
         {
             // Enable Reshuffle button for containers
-            public static bool Prefix(Telepad telepad, ImmigrantScreen __instance) 
+            public static bool Prefix(Telepad telepad, ImmigrantScreen __instance)
             {
                 // this.InitializeContainers()
                 var initializeContainers = typeof(ImmigrantScreen).GetMethod("InitializeContainers",
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 if (initializeContainers != null) initializeContainers.Invoke(__instance, null);
-                
+
                 var containers = (List<ITelepadDeliverableContainer>)Traverse.Create(__instance).Field(
                     "containers").GetValue();
 
                 foreach (var container in containers)
-                {
                     switch (container)
                     {
                         case CharacterContainer characterContainer when characterContainer != null:
@@ -57,10 +57,9 @@ namespace RePrint
                             // Debug.Log("called carePackageContainer.SetReshufflingState(true)");
                             break;
                     }
-                }
 
                 Traverse.Create(__instance).Field("telepad").SetValue(telepad);
-                return false;  // skip the original method call
+                return false; // skip the original method call
             }
         }
     }

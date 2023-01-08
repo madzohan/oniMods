@@ -22,3 +22,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Standard "Reroll" button above each suggested duplicant
+
+## [1.2.1] - 2023-01-08
+
+### Fixed
+
+- "reject all" behaviour: now it keeps blueprints after all rejected and ESC pressed, but unpause is required (in case game was paused)
+- CLRF endings replaced with LF
