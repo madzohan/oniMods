@@ -1,6 +1,7 @@
 .idea
 .gitignore
-Debug
+bin
 lib
+packages
 obj
 *.sln.DotSettings.user
