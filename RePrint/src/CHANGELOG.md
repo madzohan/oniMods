@@ -29,3 +29,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - "reject all" behaviour: now it keeps blueprints after all rejected and ESC pressed, but unpause is required (in case game was paused)
 - CLRF endings replaced with LF
+
+## [1.3.0] - 2022-12-26
+
+### Added
+- added Reroll button for care packages
+- reverted vanilla "Reject All" button behavior (but with suppressed confirmation)
