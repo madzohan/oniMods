@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using KMod;
@@ -51,28 +52,35 @@ namespace RePrint
 
                 var containers = (List<ITelepadDeliverableContainer>)Traverse.Create(__instance).Field(
                     "containers").GetValue();
+                
+                void Reshuffle(ITelepadDeliverableContainer container)
+                {
+                    var reshuffleParams = new object[] { false };
+                    var removeLast = Traverse.Create(container).Field("controller").Method("RemoveLast");
+                    removeLast.GetValue();
+                    var containerType = container.GetType();
+                    var reshuffle = containerType.GetMethod("Reshuffle", 
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (reshuffle == null) { return;}
+                    reshuffle.Invoke(container, reshuffleParams);
+                }
+                void ReBindRerollButtonToReshuffle(ITelepadDeliverableContainer container)
+                {
+                    var reshuffleButton = Traverse.Create(container).Field("reshuffleButton");
+                    reshuffleButton.Field("onClick").SetValue((System.Action)(() =>
+                        Reshuffle(container)));
+                }
 
                 foreach (var container in containers)
                     switch (container)
                     {
                         case CharacterContainer characterContainer when characterContainer != null:
                             characterContainer.SetReshufflingState(true);
+                            ReBindRerollButtonToReshuffle(characterContainer);
                             break;
                         case CarePackageContainer carePackageContainer when carePackageContainer != null:
                             carePackageContainer.SetReshufflingState(true);
-                            // fixing broken onClick bind to CarePackageContainer.Reshuffle 
-                            var reshuffleButton = Traverse.Create(carePackageContainer).Field("reshuffleButton");
-                            reshuffleButton.Field("onClick").SetValue((System.Action)(() =>
-                            {
-                                // PUtil.LogDebug("carePackageContainer reshuffle button was clicked");
-                                var reshuffle = typeof(CarePackageContainer).GetMethod("Reshuffle",
-                                    BindingFlags.NonPublic | BindingFlags.Instance);
-                                if (reshuffle == null) return;
-                                var reshuffleParams = new object[] { false };
-                                // PUtil.LogDebug("CarePackageContainer.Reshuffle method was triggered");
-                                // ReSharper disable once AccessToModifiedClosure
-                                reshuffle.Invoke(carePackageContainer, reshuffleParams);
-                            }));
+                            ReBindRerollButtonToReshuffle(carePackageContainer);
                             break;
                     }
 
