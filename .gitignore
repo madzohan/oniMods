@@ -5,3 +5,4 @@ lib
 packages
 obj
 *.sln.DotSettings.user
+%username%*

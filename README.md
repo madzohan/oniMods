@@ -5,7 +5,8 @@
  ### Description:
     
 - adds standard "Reroll" button above each suggested duplicant and care package
-- suppress "Reject All" button confirmation
+- adds another button "Reshuffle All" which reshuffles all containers
+- suppresses "Reject All" button confirmation
 
 ### Install:
 

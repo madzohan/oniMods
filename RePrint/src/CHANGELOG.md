@@ -40,3 +40,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - "Tried to add minions beyond the allowed limit" exception
+
+## [1.4.0] - 2023-02-08
+
+### Added
+- added another button "Reshuffle All" which reshuffles all containers
+- overridden ImmigrantScreen.InitializeContainers to set number of dup&package containers

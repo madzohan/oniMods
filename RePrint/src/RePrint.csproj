@@ -27,11 +27,10 @@
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <DebugType>None</DebugType>
         <Optimize>true</Optimize>
-        
-<!--    <OutputPath>..\bin\Release\</OutputPath>-->
-<!--    Linux game path  (don't change in commit)  -->
-        <OutputPath>/home/$(USER)/.config/unity3d/Klei/Oxygen Not Included/mods/Dev/RePrint/</OutputPath>
-        
+<!--    Linux path  -->
+<!--        <OutputPath>/home/$(USER)/.config/unity3d/Klei/Oxygen Not Included/mods/Dev/RePrint/</OutputPath>-->
+<!--    Windows path  -->
+        <OutputPath>$(USERPROFILE)\Documents\Klei\OxygenNotIncluded\mods\Dev\RePrint</OutputPath>
         <DefineConstants>TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -98,7 +97,6 @@
     </ItemGroup>
     <ItemGroup>
         <Content Include="CHANGELOG.md" />
-        <Content Include="TODO.md" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
    <!-- Todo - can't get it work under Linux mono runtime, so will try to run it under Windows 10 using Visual Studio-->

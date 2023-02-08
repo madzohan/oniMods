@@ -1,21 +1,103 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using HarmonyLib;
 using KMod;
-// using PeterHan.PLib.Core;
+using UnityEngine;
 
+// ReSharper disable InconsistentNaming
 namespace RePrint
 {
     public class RePrintPatches : UserMod2
     {
-        // public override void OnLoad(Harmony harmony)
-        // {
-        //     var logVersion = false;
-        //     Debug.Assert(logVersion = true); // '=', not '=='
-        //     PUtil.InitLibrary(logVersion);
-        //     base.OnLoad(harmony);
-        // }
+        private static KButton MakeReshuffleAllButton(KButton rejectBtnPrefab, KButton confirmBtnPrefab)
+        {
+            var reshuffleAllBtn = Util.KInstantiateUI<KButton>(
+                rejectBtnPrefab.gameObject, confirmBtnPrefab.transform.parent.gameObject, true);
+            reshuffleAllBtn.transform.SetAsFirstSibling();
+            reshuffleAllBtn.GetComponentInChildren<LocText>().text = "Reshuffle All";
+            var image = reshuffleAllBtn.GetComponent<KImage>();
+            image.colorStyleSetting = confirmBtnPrefab.GetComponent<KImage>().colorStyleSetting;
+            image.ApplyColorStyleSetting();
+            return reshuffleAllBtn;
+        }
+
+        private static void ReshuffleAllContainers(ImmigrantScreen imScreen)
+        {
+            var containers = (List<ITelepadDeliverableContainer>)Traverse.Create(imScreen).Field(
+                "containers").GetValue();
+            foreach (var container in containers)
+                switch (container)
+                {
+                    case CharacterContainer characterContainer when characterContainer != null:
+                        ReshuffleContainer(characterContainer);
+                        break;
+                    case CarePackageContainer carePackageContainer when carePackageContainer != null:
+                        ReshuffleContainer(carePackageContainer);
+                        break;
+                }
+        }
+
+        private static void ReshuffleContainer(ITelepadDeliverableContainer container)
+        {
+            Traverse.Create(container).Field("controller").Method("RemoveLast").GetValue();
+            var reshuffle = container.GetType().GetMethod("Reshuffle", BindingFlags.NonPublic | BindingFlags.Instance);
+            var reshuffleParams = new object[] { false };
+            if (reshuffle != null) reshuffle.Invoke(container, reshuffleParams);
+        }
+
+        private static void ReBindReshuffleButton(ITelepadDeliverableContainer container)
+        {
+            var reshuffleButton = Traverse.Create(container).Field("reshuffleButton");
+            reshuffleButton.Field("onClick").SetValue((System.Action)(() =>
+                ReshuffleContainer(container)));
+        }
+
+        private static void InitializeContainers(ImmigrantScreen imScreen)
+        {
+            var disableProceedButton = imScreen.GetType().GetMethod("DisableProceedButton",
+                BindingFlags.NonPublic | BindingFlags.Instance);
+            if (disableProceedButton != null) disableProceedButton.Invoke(imScreen, null);
+            var _containers = (List<ITelepadDeliverableContainer>)Traverse.Create(imScreen).Field(
+                "containers").GetValue();
+            if (_containers != null && _containers.Count > 0) return;
+            var _containerParent = (GameObject)Traverse.Create(imScreen).Field("containerParent").GetValue();
+            var _containerPrefab = (CharacterContainer)Traverse.Create(imScreen).Field("containerPrefab").GetValue();
+            var _carePackageContainerPrefab = (CarePackageContainer)Traverse.Create(imScreen).Field(
+                "carePackageContainerPrefab").GetValue();
+            imScreen.OnReplacedEvent = null;
+            var containers = new List<ITelepadDeliverableContainer>();
+            var numberOfDuplicantOptions = 2;  // Todo: make this configurable via PLib integration
+            var numberOfCarePackageOptions = 2;
+            for (var index = 0; index < numberOfDuplicantOptions; ++index)
+            {
+                var characterContainer = Util.KInstantiateUI<CharacterContainer>(
+                    _containerPrefab.gameObject, _containerParent);
+                characterContainer.SetController(imScreen);
+                containers.Add(characterContainer);
+            }
+            for (var index = 0; index < numberOfCarePackageOptions; ++index)
+            {
+                var packageContainer = Util.KInstantiateUI<CarePackageContainer>(
+                    _carePackageContainerPrefab.gameObject, _containerParent);
+                packageContainer.SetController(imScreen);
+                containers.Add(packageContainer);
+            }
+            var selectedDeliverables = new List<ITelepadDeliverable>();
+            Traverse.Create(imScreen).Field("selectedDeliverables").SetValue(selectedDeliverables);
+            Traverse.Create(imScreen).Field("numberOfDuplicantOptions").SetValue(numberOfDuplicantOptions);
+            Traverse.Create(imScreen).Field("numberOfCarePackageOptions").SetValue(numberOfCarePackageOptions);
+            Traverse.Create(imScreen).Field("containers").SetValue(containers);
+        }
+
+        [HarmonyPatch(typeof(ImmigrantScreen), "OnPrefabInit")]
+        public static class ImmigrantScreenOnPrefabInitPatch
+        {
+            public static void Postfix(ImmigrantScreen __instance, KButton ___rejectButton, KButton ___proceedButton)
+            {
+                var reshuffleAllBtn = MakeReshuffleAllButton(___rejectButton, ___proceedButton);
+                reshuffleAllBtn.onClick += () => ReshuffleAllContainers(__instance);
+            }
+        }
 
         [HarmonyPatch(typeof(ImmigrantScreen), "OnSpawn")]
         public static class ImmigrantScreenOnSpawnPatch
@@ -29,58 +111,25 @@ namespace RePrint
             }
         }
 
-        // [HarmonyPatch(typeof(ImmigrantScreen), "OnRejectionConfirmed")]
-        // public static class ImmigrantScreenOnRejectionConfirmedPatch
-        // {
-        //     // Following "rejection confirm" actions with a new ImmigrantScreen generated
-        //     public static void Postfix(ImmigrantScreen __instance)
-        //     {
-        //         Immigration.Instance.timeBeforeSpawn = 0.0f;
-        //         ImmigrantScreen.InitializeImmigrantScreen(__instance.Telepad);
-        //     }
-        // }
-
         [HarmonyPatch(typeof(ImmigrantScreen), "Initialize")]
         public static class ImmigrantScreenInitializePatch
         {
             // Enable Reshuffle button for containers
             public static bool Prefix(Telepad telepad, ImmigrantScreen __instance)
             {
-                var initializeContainers = typeof(ImmigrantScreen).GetMethod("InitializeContainers",
-                    BindingFlags.NonPublic | BindingFlags.Instance);
-                if (initializeContainers != null) initializeContainers.Invoke(__instance, null);
-
+                InitializeContainers(__instance);
                 var containers = (List<ITelepadDeliverableContainer>)Traverse.Create(__instance).Field(
                     "containers").GetValue();
-                
-                void Reshuffle(ITelepadDeliverableContainer container)
-                {
-                    var reshuffleParams = new object[] { false };
-                    var removeLast = Traverse.Create(container).Field("controller").Method("RemoveLast");
-                    removeLast.GetValue();
-                    var containerType = container.GetType();
-                    var reshuffle = containerType.GetMethod("Reshuffle", 
-                        BindingFlags.NonPublic | BindingFlags.Instance);
-                    if (reshuffle == null) { return;}
-                    reshuffle.Invoke(container, reshuffleParams);
-                }
-                void ReBindRerollButtonToReshuffle(ITelepadDeliverableContainer container)
-                {
-                    var reshuffleButton = Traverse.Create(container).Field("reshuffleButton");
-                    reshuffleButton.Field("onClick").SetValue((System.Action)(() =>
-                        Reshuffle(container)));
-                }
-
                 foreach (var container in containers)
                     switch (container)
                     {
                         case CharacterContainer characterContainer when characterContainer != null:
                             characterContainer.SetReshufflingState(true);
-                            ReBindRerollButtonToReshuffle(characterContainer);
+                            ReBindReshuffleButton(characterContainer);
                             break;
                         case CarePackageContainer carePackageContainer when carePackageContainer != null:
                             carePackageContainer.SetReshufflingState(true);
-                            ReBindRerollButtonToReshuffle(carePackageContainer);
+                            ReBindReshuffleButton(carePackageContainer);
                             break;
                     }
 
