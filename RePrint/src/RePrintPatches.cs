@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using Klei.CustomSettings;
 using KMod;
 using UnityEngine;
 
@@ -68,6 +69,13 @@ namespace RePrint
             var containers = new List<ITelepadDeliverableContainer>();
             var numberOfDuplicantOptions = 2;  // Todo: make this configurable via PLib integration
             var numberOfCarePackageOptions = 2;
+            if (CustomGameSettings.Instance.GetCurrentQualitySetting(CustomGameSettingConfigs.CarePackages).id !=
+                "Enabled")
+            {
+                numberOfCarePackageOptions = 0;
+                numberOfDuplicantOptions = 4;
+            }
+            
             for (var index = 0; index < numberOfDuplicantOptions; ++index)
             {
                 var characterContainer = Util.KInstantiateUI<CharacterContainer>(
