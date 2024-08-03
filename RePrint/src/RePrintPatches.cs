@@ -22,9 +22,9 @@ namespace RePrint
             return reshuffleAllBtn;
         }
 
-        private static void ReshuffleAllContainers(ImmigrantScreen imScreen)
+        private static void ReshuffleAllContainers(ImmigrantScreen immigrantScreen)
         {
-            var containers = (List<ITelepadDeliverableContainer>)Traverse.Create(imScreen).Field(
+            var containers = (List<ITelepadDeliverableContainer>)Traverse.Create(immigrantScreen).Field(
                 "containers").GetValue();
             foreach (var container in containers)
                 switch (container)
@@ -41,8 +41,17 @@ namespace RePrint
         private static void ReshuffleContainer(ITelepadDeliverableContainer container)
         {
             Traverse.Create(container).Field("controller").Method("RemoveLast").GetValue();
-            var reshuffle = container.GetType().GetMethod("Reshuffle", BindingFlags.NonPublic | BindingFlags.Instance);
             var reshuffleParams = new object[] { false };
+            MethodInfo reshuffle = null;
+            switch (container)
+            {
+                case CharacterContainer characterContainer when characterContainer != null:
+                    reshuffle = typeof(CharacterContainer).GetMethod("Reshuffle", BindingFlags.Public | BindingFlags.Instance);
+                    break;
+                case CarePackageContainer carePackageContainer when carePackageContainer != null:
+                    reshuffle = typeof(CarePackageContainer).GetMethod("Reshuffle", BindingFlags.NonPublic | BindingFlags.Instance);
+                    break;
+            }
             if (reshuffle != null) reshuffle.Invoke(container, reshuffleParams);
         }
 

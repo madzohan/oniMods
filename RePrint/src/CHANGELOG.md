@@ -52,3 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - "mod adds carepackages, even if you disabled them in your game"
   Now mod respects this setting on game creation step
+
+## [1.4.2] - 2024-08-04
+
+### Fixed
+- fixed reshuffleAllBtn via changing reflection binding attribute, since game devs changed CharacterContainer.Reshuffle method from private to public
