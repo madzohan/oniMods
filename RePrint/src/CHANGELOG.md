@@ -46,3 +46,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - added another button "Reshuffle All" which reshuffles all containers
 - overridden ImmigrantScreen.InitializeContainers to set number of dup&package containers
+
+## [1.4.1] - 2023-02-22
+
+### Fixed
+- "mod adds carepackages, even if you disabled them in your game"
+  Now mod respects this setting on game creation step
