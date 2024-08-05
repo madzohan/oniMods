@@ -57,3 +57,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - fixed reshuffleAllBtn via changing reflection binding attribute, since game devs changed CharacterContainer.Reshuffle method from private to public
+
+## [1.5.0] - 2024-08-06
+
+### Added
+- added one button localization =) for all officially supported languages + ukrainian

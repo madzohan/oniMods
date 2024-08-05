@@ -18,7 +18,8 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>..\bin\Debug\</OutputPath>
+        <!--    Windows path  -->
+        <OutputPath>$(USERPROFILE)\Documents\Klei\OxygenNotIncluded\mods\Dev\RePrint</OutputPath>
         <DefineConstants>DEBUG;TRACE</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -83,20 +84,30 @@
     </ItemGroup>
     <ItemGroup>
 <!--        <Compile Include="RePrintOptions.cs" />-->
-        <Compile Include="RePrintPatches.cs" />
+        <Compile Include="Patches.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
+        <Compile Include="STRINGS.cs" />
     </ItemGroup>
     <ItemGroup>
         <None Include="mod.yaml">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <None Include="mod_info.yaml">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
-<!--        <None Include="packages.config" />-->
-    </ItemGroup>
-    <ItemGroup>
         <Content Include="CHANGELOG.md" />
+        <None Include="translations\uk.po">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="translations\ru.po">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="translations\zh.po">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None Include="translations\ko.po">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
    <!-- Todo - can't get it work under Linux mono runtime, so will try to run it under Windows 10 using Visual Studio-->

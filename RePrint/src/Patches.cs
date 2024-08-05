@@ -1,13 +1,47 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using HarmonyLib;
 using Klei.CustomSettings;
 using KMod;
 using UnityEngine;
+using static Localization;
 
 // ReSharper disable InconsistentNaming
 namespace RePrint
 {
+    [HarmonyPatch(typeof(Localization), "Initialize")]
+    public class LocalizationInitializePatch
+    // All credits for localization part to @aki-art (https://github.com/aki-art/ONI-Mods)
+    {
+        public static void Postfix() => Translate(typeof(STRINGS));
+
+        private static void Translate(Type root)
+        {
+            // Basic intended way to register strings, keeps namespace
+            RegisterForTranslation(root);
+ 
+            // Load user created translation files
+            LoadStrings();
+ 
+            // Register strings without namespace
+            // because we already loaded user translations, custom languages will overwrite these
+            LocString.CreateLocStringKeys(root, null);
+ 
+            // Creates template for users to edit
+            GenerateStringsTemplate(root, Path.Combine(Manager.GetDirectory(), "strings_templates"));
+        }
+
+        private static string ModPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+ 
+        private static void LoadStrings()
+        {
+            var path = Path.Combine(ModPath, "translations", GetLocale()?.Code + ".po");
+            if (!File.Exists(path)) return;
+            OverloadStrings(LoadStringsFile(path, false));
+        }
+    }
     public class RePrintPatches : UserMod2
     {
         private static KButton MakeReshuffleAllButton(KButton rejectBtnPrefab, KButton confirmBtnPrefab)
@@ -15,7 +49,8 @@ namespace RePrint
             var reshuffleAllBtn = Util.KInstantiateUI<KButton>(
                 rejectBtnPrefab.gameObject, confirmBtnPrefab.transform.parent.gameObject, true);
             reshuffleAllBtn.transform.SetAsFirstSibling();
-            reshuffleAllBtn.GetComponentInChildren<LocText>().text = "Reshuffle All";
+            var reshuffleAllBtnLabel = reshuffleAllBtn.GetComponentInChildren<LocText>();
+            reshuffleAllBtnLabel.text = STRINGS.UI.IMMIGRANTSCREEN.RESHUFFLEAllBTN.TEXT;
             var image = reshuffleAllBtn.GetComponent<KImage>();
             image.colorStyleSetting = confirmBtnPrefab.GetComponent<KImage>().colorStyleSetting;
             image.ApplyColorStyleSetting();
