@@ -15,4 +15,4 @@ msgstr ""
 #. RePrint.STRINGS.UI.IMMIGRANTSCREEN.RESHUFFLEAllBTN.TEXT
 msgctxt "RePrint.STRINGS.UI.IMMIGRANTSCREEN.RESHUFFLEAllBTN.TEXT"
 msgid "Reshuffle All"
-msgstr "重选"
+msgstr "全部重选"
