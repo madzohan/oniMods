@@ -1,3 +1,6 @@
+> [!WARNING]
+> I've deleted this mod from Steam because there is great "Duplicant Stat Selector" by Sgt_Imalas
+
 # "Oxygen not included" mods
 
 ## RePrint
